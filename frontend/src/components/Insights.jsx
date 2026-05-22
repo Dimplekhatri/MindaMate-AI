@@ -6,261 +6,325 @@ import React, {
 import axios from "axios";
 
 import {
+
+    ResponsiveContainer,
     PieChart,
     Pie,
     Cell,
     Tooltip,
-    ResponsiveContainer,
     BarChart,
     Bar,
     XAxis,
-    YAxis,
-    CartesianGrid
+    YAxis
+
 } from "recharts";
-
-const COLORS = [
-    "#22d3ee",
-    "#ec4899",
-    "#8b5cf6",
-    "#10b981",
-    "#f59e0b",
-    "#ef4444",
-    "#6366f1",
-];
-
-const moodEmoji = {
-
-    happy: "😊",
-    sad: "😔",
-    anxious: "😰",
-    stressed: "😵",
-    angry: "😡",
-    calm: "😌",
-    overwhelmed: "🥺",
-    hopeful: "✨",
-    lonely: "💔",
-    tired: "😴",
-    content: "🌸"
-};
 
 const Insights = () => {
 
-    const [data, setData] = useState(null);
+    const [insights, setInsights] =
+        useState(null);
 
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] =
+        useState(true);
+
+    const COLORS = [
+
+        "#22d3ee",
+        "#a855f7",
+        "#ec4899",
+        "#38bdf8",
+        "#facc15"
+    ];
+
+    // ===================
+    // FETCH INSIGHTS
+    // ===================
 
     useEffect(() => {
+
+        const fetchInsights =
+            async () => {
+
+                try {
+
+                    const token =
+                        localStorage.getItem(
+                            "token"
+                        );
+
+                    const response =
+                        await axios.get(
+
+                            "http://localhost:9000/api/insights",
+
+                            {
+                                headers: {
+                                    Authorization:
+                                        `Bearer ${token}`
+                                }
+                            }
+                        );
+
+                    setInsights(
+                        response.data
+                    );
+
+                } catch (error) {
+
+                    console.log(
+                        error
+                    );
+
+                }
+
+                setLoading(
+                    false
+                );
+            };
 
         fetchInsights();
 
     }, []);
 
-    const fetchInsights = async () => {
-
-        try {
-
-            const token =
-                localStorage.getItem("token");
-
-            const response = await axios.get(
-                "http://localhost:9000/api/insights",
-                {
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`
-                    }
-                }
-            );
-
-            setData(
-                response.data.insights
-            );
-
-        } catch (error) {
-
-            console.log(error);
-
-        } finally {
-
-            setLoading(false);
-        }
-    };
-
     if (loading) {
 
         return (
-            <div className="min-h-screen bg-[#050816] text-white flex items-center justify-center">
+
+            <div className="min-h-screen flex items-center justify-center text-white text-2xl">
+
                 Loading Insights...
+
             </div>
         );
     }
 
-    const pieData = Object.entries(
-        data.moodCounts
-    ).map(([mood, count]) => ({
-        name: mood,
-        value: count
-    }));
+    if (!insights) {
+
+        return (
+
+            <div className="min-h-screen flex items-center justify-center text-red-400 text-xl">
+
+                Failed to load insights
+
+            </div>
+        );
+    }
+
+    const moodData =
+        insights.moodCounts?.map(
+            (item) => ({
+
+                name:
+                    item._id,
+
+                value:
+                    item.count
+            })
+        ) || [];
 
     return (
 
-        <div className="min-h-screen bg-[#050816] text-white px-6 pt-32 pb-16 relative overflow-hidden">
+        <div className="min-h-screen bg-[#050816] text-white relative overflow-hidden">
 
-            {/* BACKGROUND GLOW */}
-            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-cyan-500/20 blur-[140px]" />
+            {/* BG GLOW */}
+            <div className="absolute top-0 left-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-cyan-500/15 blur-[160px]" />
 
-            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-pink-500/20 blur-[140px]" />
+            <div className="absolute bottom-0 right-0 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-pink-500/15 blur-[160px]" />
 
-            {/* TITLE */}
-            <div className="text-center mb-14 relative z-10">
+            {/* MAIN */}
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-28 pb-10">
 
-                <h1 className="text-6xl font-black bg-gradient-to-r from-cyan-300 via-blue-300 to-pink-300 bg-clip-text text-transparent">
-                    AI Insights ✨
-                </h1>
+                {/* TITLE */}
+                <div className="text-center mb-10">
 
-                <p className="text-gray-400 mt-4 text-xl">
-                    Your emotional wellness analytics 💜
-                </p>
+                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-cyan-300 to-pink-400 bg-clip-text text-transparent">
 
-            </div>
+                        AI Insights 📊
 
-            {/* TOP STATS */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-7xl mx-auto mb-12 relative z-10">
+                    </h1>
 
-                <div className="rounded-3xl border border-cyan-500/20 bg-white/5 backdrop-blur-xl p-6">
+                    <p className="text-white/60 mt-3 text-sm sm:text-lg">
 
-                    <p className="text-gray-400 mb-2">
-                        Wellness Score
-                    </p>
+                        Your emotional wellness dashboard
 
-                    <h2 className="text-5xl font-black text-cyan-300">
-                        {data.wellnessScore}%
-                    </h2>
-
-                </div>
-
-                <div className="rounded-3xl border border-pink-500/20 bg-white/5 backdrop-blur-xl p-6">
-
-                    <p className="text-gray-400 mb-2">
-                        Most Common Mood
-                    </p>
-
-                    <h2 className="text-4xl font-bold">
-                        {
-                            moodEmoji[data.topMood]
-                        } {data.topMood}
-                    </h2>
-
-                </div>
-
-                <div className="rounded-3xl border border-purple-500/20 bg-white/5 backdrop-blur-xl p-6">
-
-                    <p className="text-gray-400 mb-2">
-                        Total AI Chats
-                    </p>
-
-                    <h2 className="text-5xl font-black text-purple-300">
-                        {data.totalChats}
-                    </h2>
-
-                </div>
-
-                <div className="rounded-3xl border border-green-500/20 bg-white/5 backdrop-blur-xl p-6">
-
-                    <p className="text-gray-400 mb-2">
-                        AI Emotional Insight
-                    </p>
-
-                    <p className="text-green-300 text-lg leading-relaxed">
-                        {data.trendMessage}
                     </p>
 
                 </div>
 
-            </div>
+                {/* STATS */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
 
-            {/* CHARTS */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-7xl mx-auto relative z-10">
+                    {/* TOTAL */}
+                    <div className="rounded-[30px] bg-white/5 border border-cyan-400/10 backdrop-blur-xl p-6 shadow-[0_0_40px_rgba(34,211,238,0.12)]">
 
-                {/* PIE CHART */}
-                <div className="rounded-3xl border border-cyan-500/20 bg-white/5 backdrop-blur-xl p-8">
+                        <p className="text-white/60">
 
-                    <h2 className="text-3xl font-bold mb-6">
-                        Mood Distribution
-                    </h2>
+                            Total Chats
 
-                    <ResponsiveContainer
-                        width="100%"
-                        height={350}
-                    >
+                        </p>
 
-                        <PieChart>
+                        <h2 className="text-4xl font-black text-cyan-300 mt-2">
 
-                            <Pie
-                                data={pieData}
-                                dataKey="value"
-                                outerRadius={120}
-                                label
-                            >
+                            {
+                                insights.totalChats
+                            }
 
-                                {
-                                    pieData.map(
-                                        (entry, index) => (
+                        </h2>
 
-                                            <Cell
-                                                key={index}
-                                                fill={
-                                                    COLORS[
-                                                    index %
-                                                    COLORS.length
-                                                    ]
-                                                }
-                                            />
-                                        )
-                                    )
-                                }
+                    </div>
 
-                            </Pie>
+                    {/* MOOD */}
+                    <div className="rounded-[30px] bg-white/5 border border-pink-400/10 backdrop-blur-xl p-6 shadow-[0_0_40px_rgba(236,72,153,0.12)]">
 
-                            <Tooltip />
+                        <p className="text-white/60">
 
-                        </PieChart>
+                            Top Mood
 
-                    </ResponsiveContainer>
+                        </p>
+
+                        <h2 className="text-3xl font-black text-pink-300 mt-2">
+
+                            {
+                                insights.topMood ||
+                                "—"
+                            }
+
+                        </h2>
+
+                    </div>
+
+                    {/* WELLNESS */}
+                    <div className="rounded-[30px] bg-white/5 border border-purple-400/10 backdrop-blur-xl p-6 shadow-[0_0_40px_rgba(168,85,247,0.12)]">
+
+                        <p className="text-white/60">
+
+                            Wellness Score
+
+                        </p>
+
+                        <h2 className="text-4xl font-black text-purple-300 mt-2">
+
+                            {
+                                insights.wellnessScore
+                            }%
+
+                        </h2>
+
+                    </div>
 
                 </div>
 
-                {/* BAR CHART */}
-                <div className="rounded-3xl border border-pink-500/20 bg-white/5 backdrop-blur-xl p-8">
+                {/* CHARTS */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                    <h2 className="text-3xl font-bold mb-6">
-                        Emotional Activity
-                    </h2>
+                    {/* PIE */}
+                    <div className="rounded-[34px] bg-[#081120]/90 border border-cyan-400/10 p-5 sm:p-6 backdrop-blur-xl">
 
-                    <ResponsiveContainer
-                        width="100%"
-                        height={350}
-                    >
+                        <h2 className="text-2xl font-bold mb-5 text-cyan-300">
 
-                        <BarChart data={pieData}>
+                            Mood Distribution
 
-                            <CartesianGrid strokeDasharray="3 3" />
+                        </h2>
 
-                            <XAxis dataKey="name" />
+                        <div className="w-full h-[320px] sm:h-[380px]">
 
-                            <YAxis />
+                            <ResponsiveContainer>
 
-                            <Tooltip />
+                                <PieChart>
 
-                            <Bar
-                                dataKey="value"
-                                fill="#8b5cf6"
-                                radius={[10, 10, 0, 0]}
-                            />
+                                    <Pie
+                                        data={
+                                            moodData
+                                        }
+                                        dataKey="value"
+                                        outerRadius={
+                                            120
+                                        }
+                                        label
+                                    >
 
-                        </BarChart>
+                                        {
+                                            moodData.map(
+                                                (
+                                                    entry,
+                                                    index
+                                                ) => (
 
-                    </ResponsiveContainer>
+                                                    <Cell
+                                                        key={
+                                                            index
+                                                        }
+                                                        fill={
+                                                            COLORS[
+                                                                index %
+                                                                COLORS.length
+                                                            ]
+                                                        }
+                                                    />
+                                                )
+                                            )
+                                        }
+
+                                    </Pie>
+
+                                    <Tooltip />
+
+                                </PieChart>
+
+                            </ResponsiveContainer>
+
+                        </div>
+
+                    </div>
+
+                    {/* BAR */}
+                    <div className="rounded-[34px] bg-[#081120]/90 border border-pink-400/10 p-5 sm:p-6 backdrop-blur-xl">
+
+                        <h2 className="text-2xl font-bold mb-5 text-pink-300">
+
+                            Mood Activity
+
+                        </h2>
+
+                        <div className="w-full h-[320px] sm:h-[380px]">
+
+                            <ResponsiveContainer>
+
+                                <BarChart
+                                    data={
+                                        moodData
+                                    }
+                                >
+
+                                    <XAxis
+                                        dataKey="name"
+                                        stroke="#ccc"
+                                    />
+
+                                    <YAxis
+                                        stroke="#ccc"
+                                    />
+
+                                    <Tooltip />
+
+                                    <Bar
+                                        dataKey="value"
+                                        radius={[
+                                            12,
+                                            12,
+                                            0,
+                                            0
+                                        ]}
+                                        fill="#a855f7"
+                                    />
+
+                                </BarChart>
+
+                            </ResponsiveContainer>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
